@@ -11,7 +11,9 @@ import { fileURLToPath } from 'url';
 import * as dotenv from 'dotenv';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-dotenv.config({ path: join(__dirname, '../backend/.env') });
+// After the Next.js restructure the env lives at the repo root.
+dotenv.config({ path: join(__dirname, '../.env.local') });
+dotenv.config({ path: join(__dirname, '../.env') });
 
 // Bengaluru wards data
 const WARDS = [
