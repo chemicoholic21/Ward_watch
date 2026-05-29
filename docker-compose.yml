@@ -1,19 +1,17 @@
 version: '3.8'
 
-# Local dev stack. You only need ONE database — pick either:
-#   docker-compose up -d elasticsearch kibana web      (current code, uses ES)
-#   docker-compose up -d mongo mongo-express web       (after the ES->Mongo swap)
+# Local dev stack. Just MongoDB now — Elasticsearch is gone.
 #
-# - elasticsearch / kibana: current backend (default; required until ES->Mongo
-#   migration ships)
-# - mongo / mongo-express: ready for when the code is migrated. mongo-express
-#   is a web UI at http://localhost:8081 (admin/pass).
-# - web: the Next.js app (frontend + API routes)
+#   docker-compose up -d                       # mongo + mongo-express + web
+#   docker-compose up -d mongo mongo-express   # just the database + UI
+#
+# mongo-express is the web UI at http://localhost:8081 (admin/pass).
 
 services:
   mongo:
     image: mongo:7.0
     container_name: ghostoffice-mongo
+    restart: unless-stopped
     ports:
       - "27017:27017"
     volumes:
@@ -38,34 +36,6 @@ services:
       mongo:
         condition: service_healthy
 
-  elasticsearch:
-    image: docker.elastic.co/elasticsearch/elasticsearch:8.12.0
-    container_name: ghostoffice-es
-    environment:
-      - discovery.type=single-node
-      - xpack.security.enabled=false
-      - "ES_JAVA_OPTS=-Xms2g -Xmx2g"
-    ports:
-      - "9200:9200"
-    volumes:
-      - es_data:/usr/share/elasticsearch/data
-    healthcheck:
-      test: ["CMD-SHELL", "curl -f http://localhost:9200 || exit 1"]
-      interval: 30s
-      timeout: 10s
-      retries: 5
-
-  kibana:
-    image: docker.elastic.co/kibana/kibana:8.12.0
-    container_name: ghostoffice-kibana
-    environment:
-      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
-    ports:
-      - "5601:5601"
-    depends_on:
-      elasticsearch:
-        condition: service_healthy
-
   web:
     image: node:20-alpine
     container_name: ghostoffice-web
@@ -75,10 +45,11 @@ services:
       - "3000:3000"
     environment:
       - NODE_ENV=development
-      - ES_NODE=http://elasticsearch:9200
+      - MONGO_URI=mongodb://mongo:27017
+      - MONGO_DB=ghostoffice
       - NEXT_PUBLIC_API_URL=
     depends_on:
-      elasticsearch:
+      mongo:
         condition: service_healthy
     volumes:
       - .:/app
@@ -86,8 +57,6 @@ services:
       - /app/.next
 
 volumes:
-  es_data:
-    driver: local
   mongo_data:
     driver: local
 

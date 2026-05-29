@@ -5,10 +5,10 @@ const nextConfig = {
     NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL || '',
   },
   experimental: {
-    // @elastic/elasticsearch ships `undici` (uses private class fields) which
-    // webpack can't parse. Loading it via Node require() at runtime sidesteps
-    // the bundler entirely.
-    serverComponentsExternalPackages: ['@elastic/elasticsearch', 'undici'],
+    // The mongodb driver ships native-ish modules that webpack doesn't need
+    // to crawl. Marking it external means it loads via Node require() at
+    // runtime, which is also faster than re-bundling on every cold start.
+    serverComponentsExternalPackages: ['mongodb'],
   },
   async headers() {
     // Security headers (replaces the Express `helmet()` middleware).

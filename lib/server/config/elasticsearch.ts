@@ -1,40 +1,36 @@
-import { Client } from '@elastic/elasticsearch';
-import { config } from './environment';
-
-let esClient: Client | null = null;
-
-export function getElasticsearchClient(): Client {
-  if (esClient) return esClient;
-
-  // Use Cloud ID if available, otherwise use node URL
-  if (config.elasticsearch.cloudId && config.elasticsearch.apiKey) {
-    esClient = new Client({
-      cloud: { id: config.elasticsearch.cloudId },
-      auth: { apiKey: config.elasticsearch.apiKey },
-    });
-  } else {
-    esClient = new Client({
-      node: config.elasticsearch.node,
-    });
-  }
-
-  return esClient;
-}
+/**
+ * Back-compat shim — route handlers still import `ES_INDICES` and
+ * `ES_PIPELINES` from this path. Re-export the Mongo collection/pipeline
+ * constants under those names so the handlers can keep using
+ * `ES_INDICES.CIVIC_EVENTS` (= 'civic_events') unchanged.
+ *
+ * `getElasticsearchClient()` is preserved as a no-op-ish shim too because the
+ * old health route called it directly; the new health route uses
+ * mongoService.health() instead.
+ */
+import { COLLECTIONS, PIPELINES } from './mongodb';
 
 export const ES_INDICES = {
-  CIVIC_EVENTS: 'civic-events',
-  GHOST_OFFICES: 'ghost-offices',
-  SCAM_REPORTS: 'scam-reports',
-  ESCALATION_TRACES: 'escalation-traces',
-  WARD_METRICS: 'ward-metrics',
-  CIVIC_VECTORS: 'civic-vectors',
+  CIVIC_EVENTS: COLLECTIONS.CIVIC_EVENTS,
+  GHOST_OFFICES: COLLECTIONS.GHOST_OFFICES,
+  SCAM_REPORTS: COLLECTIONS.SCAM_REPORTS,
+  ESCALATION_TRACES: COLLECTIONS.ESCALATION_TRACES,
+  WARD_METRICS: COLLECTIONS.WARD_METRICS,
+  CIVIC_VECTORS: COLLECTIONS.CIVIC_VECTORS,
 } as const;
 
-export const ES_PIPELINES = {
-  CIVIC_EVENT: 'civic-event-pipeline',
-  SCAM_DETECTION: 'scam-detection-pipeline',
-  GEO_ENRICHMENT: 'geo-enrichment-pipeline',
-} as const;
+export const ES_PIPELINES = PIPELINES;
 
-export type ESIndex = typeof ES_INDICES[keyof typeof ES_INDICES];
-export type ESPipeline = typeof ES_PIPELINES[keyof typeof ES_PIPELINES];
+export type ESIndex = (typeof ES_INDICES)[keyof typeof ES_INDICES];
+export type ESPipeline = (typeof ES_PIPELINES)[keyof typeof ES_PIPELINES];
+
+/**
+ * Deprecated — kept for legacy callers. Throws if called because the ES
+ * client is gone. Use `getDb()` from `lib/server/config/mongodb` instead.
+ */
+export function getElasticsearchClient(): never {
+  throw new Error(
+    'getElasticsearchClient() is gone — the data layer is MongoDB now. ' +
+      'Use `import { getDb } from "@/lib/server/config/mongodb"` instead.',
+  );
+}
