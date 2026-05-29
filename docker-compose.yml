@@ -1,12 +1,43 @@
 version: '3.8'
 
-# Single-service stack now that the app is a unified Next.js project.
-# - elasticsearch: data store (use Elastic Cloud / OpenSearch / Atlas for prod)
-# - kibana: optional dev UI for ES
-# - web: the Next.js app (frontend + API routes, replaces the old `frontend` +
-#        `backend` services)
+# Local dev stack. You only need ONE database — pick either:
+#   docker-compose up -d elasticsearch kibana web      (current code, uses ES)
+#   docker-compose up -d mongo mongo-express web       (after the ES->Mongo swap)
+#
+# - elasticsearch / kibana: current backend (default; required until ES->Mongo
+#   migration ships)
+# - mongo / mongo-express: ready for when the code is migrated. mongo-express
+#   is a web UI at http://localhost:8081 (admin/pass).
+# - web: the Next.js app (frontend + API routes)
 
 services:
+  mongo:
+    image: mongo:7.0
+    container_name: ghostoffice-mongo
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--quiet", "--eval", "db.runCommand({ ping: 1 }).ok"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  mongo-express:
+    image: mongo-express:1.0.2
+    container_name: ghostoffice-mongo-express
+    restart: unless-stopped
+    ports:
+      - "8081:8081"
+    environment:
+      ME_CONFIG_MONGODB_SERVER: mongo
+      ME_CONFIG_BASICAUTH_USERNAME: admin
+      ME_CONFIG_BASICAUTH_PASSWORD: pass
+    depends_on:
+      mongo:
+        condition: service_healthy
+
   elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch:8.12.0
     container_name: ghostoffice-es
@@ -56,6 +87,8 @@ services:
 
 volumes:
   es_data:
+    driver: local
+  mongo_data:
     driver: local
 
 networks:
