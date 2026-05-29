@@ -1,7 +1,12 @@
 version: '3.8'
 
+# Single-service stack now that the app is a unified Next.js project.
+# - elasticsearch: data store (use Elastic Cloud / OpenSearch / Atlas for prod)
+# - kibana: optional dev UI for ES
+# - web: the Next.js app (frontend + API routes, replaces the old `frontend` +
+#        `backend` services)
+
 services:
-  # Local Elasticsearch (for development - use Elastic Cloud for production)
   elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch:8.12.0
     container_name: ghostoffice-es
@@ -19,7 +24,6 @@ services:
       timeout: 10s
       retries: 5
 
-  # Local Kibana (for development)
   kibana:
     image: docker.elastic.co/kibana/kibana:8.12.0
     container_name: ghostoffice-kibana
@@ -31,38 +35,22 @@ services:
       elasticsearch:
         condition: service_healthy
 
-  # Backend API
-  backend:
-    build:
-      context: ./backend
-      dockerfile: ../infrastructure/docker/Dockerfile.backend
-    container_name: ghostoffice-backend
+  web:
+    image: node:20-alpine
+    container_name: ghostoffice-web
+    working_dir: /app
+    command: sh -c "npm install && npm run dev"
     ports:
-      - "4000:4000"
+      - "3000:3000"
     environment:
       - NODE_ENV=development
       - ES_NODE=http://elasticsearch:9200
+      - NEXT_PUBLIC_API_URL=
     depends_on:
       elasticsearch:
         condition: service_healthy
     volumes:
-      - ./backend:/app
-      - /app/node_modules
-
-  # Frontend
-  frontend:
-    build:
-      context: ./frontend
-      dockerfile: ../infrastructure/docker/Dockerfile.frontend
-    container_name: ghostoffice-frontend
-    ports:
-      - "3000:3000"
-    environment:
-      - NEXT_PUBLIC_API_URL=http://localhost:4000/api
-    depends_on:
-      - backend
-    volumes:
-      - ./frontend:/app
+      - .:/app
       - /app/node_modules
       - /app/.next
 
