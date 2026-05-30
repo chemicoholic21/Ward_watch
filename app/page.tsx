@@ -47,12 +47,6 @@ const Icon = {
       <path d="M12 5v14M19 12l-7 7-7-7" />
     </svg>
   ),
-  Search: ({ className = 'w-4 h-4' }) => (
-    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-      <circle cx="11" cy="11" r="7" />
-      <path d="M21 21l-4.35-4.35" />
-    </svg>
-  ),
   Spark: ({ className = 'w-3 h-3' }) => (
     <svg className={className} viewBox="0 0 24 24" fill="currentColor">
       <path d="M12 2l1.6 5.4L19 9l-5.4 1.6L12 16l-1.6-5.4L5 9l5.4-1.6z" />
@@ -65,7 +59,6 @@ const Icon = {
 // ─────────────────────────────────────────────────────────────────────────────
 export default function Dashboard() {
   const [isLoading, setIsLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState('overview');
   const [ghostOffices, setGhostOffices] = useState<GhostOffice[]>([]);
   const [scamReports, setScamReports] = useState<ScamReport[]>([]);
   const [analyzeInput, setAnalyzeInput] = useState('');
@@ -142,11 +135,11 @@ export default function Dashboard() {
   return (
     <div className="min-h-screen bg-bg text-fg">
       <Header />
-      <Nav active={activeTab} onChange={setActiveTab} criticalCount={displayGhosts.filter(g => g.alert_level === 'critical').length} scamCount={displayScams.length} />
+      <Nav criticalCount={displayGhosts.filter(g => g.alert_level === 'critical').length} scamCount={displayScams.length} />
 
       <main className="mx-auto max-w-6xl px-6 sm:px-10 py-12 sm:py-16 animate-fade-in">
         {/* ── Hero stats ──────────────────────────────────────────────────── */}
-        <section className="mb-16 sm:mb-20">
+        <section id="overview" className="scroll-mt-32 mb-16 sm:mb-20">
           <p className="label mb-2">Bengaluru · Last 30 days</p>
           <h1 className="display text-display sm:text-display-lg text-fg mb-12 max-w-3xl">
             Civic accountability,
@@ -163,7 +156,7 @@ export default function Dashboard() {
         </section>
 
         {/* ── Ghost office leaderboard ───────────────────────────────────── */}
-        <Section title="Ghost office leaderboard" subtitle="Offices ranked by composite unresponsiveness score" right={<a href="#" className="text-fg-muted hover:text-fg text-sm transition-colors inline-flex items-center gap-1.5">View all <Icon.ArrowRight /></a>}>
+        <Section id="ghost-offices" title="Ghost office leaderboard" subtitle="Offices ranked by composite unresponsiveness score" right={<a href="#" className="text-fg-muted hover:text-fg text-sm transition-colors inline-flex items-center gap-1.5">View all <Icon.ArrowRight /></a>}>
           <div className="border-y border-line">
             {displayGhosts.slice(0, 5).map((office, idx) => (
               <OfficeRow key={office.office_id} rank={idx + 1} office={office} />
@@ -172,7 +165,7 @@ export default function Dashboard() {
         </Section>
 
         {/* ── TrustLens ──────────────────────────────────────────────────── */}
-        <Section title="TrustLens" subtitle="Paste a suspicious message to classify it">
+        <Section id="trustlens" title="TrustLens" subtitle="Paste a suspicious message to classify it">
           <div className="grid lg:grid-cols-5 gap-10">
             <div className="lg:col-span-3">
               <textarea
@@ -216,7 +209,7 @@ export default function Dashboard() {
         </Section>
 
         {/* ── Civic health ───────────────────────────────────────────────── */}
-        <Section title="Civic health" subtitle="Zone-level grades across complaint resolution metrics">
+        <Section id="civic-health" title="Civic health" subtitle="Zone-level grades across complaint resolution metrics">
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-px bg-line">
             {[
               { zone: 'East',    grade: 'C', score: 45.2, complaints: 1250, ghosts: 4 },
@@ -231,7 +224,7 @@ export default function Dashboard() {
         </Section>
 
         {/* ── Agents ─────────────────────────────────────────────────────── */}
-        <Section title="Intelligence agents" subtitle="Specialised tools for civic investigation">
+        <Section id="agents" title="Intelligence agents" subtitle="Specialised tools for civic investigation">
           <div className="grid sm:grid-cols-2 gap-px bg-line">
             {[
               { name: 'Ghost Hunter',      desc: 'Detects unresponsive offices via complaint pattern analysis',  status: 'Active' },
@@ -256,65 +249,77 @@ function Header() {
   return (
     <header className="sticky top-0 z-40 backdrop-blur-xl bg-bg/80 border-b border-line">
       <div className="mx-auto max-w-6xl px-6 sm:px-10 h-14 flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <div className="display text-lg text-fg">GhostOffice</div>
+        <a href="#overview" className="flex items-center gap-2 group">
+          <div className="display text-lg text-fg group-hover:text-fg transition-colors">GhostOffice</div>
           <span className="text-fg-subtle text-xs">·</span>
           <span className="text-fg-muted text-xs">Civic Intelligence</span>
-        </div>
-        <div className="hidden sm:flex items-center gap-2 text-fg-muted">
-          <Icon.Search />
-          <input
-            type="text"
-            placeholder="Search complaints, wards, departments…"
-            className="bg-transparent text-sm placeholder:text-fg-subtle focus:outline-none w-72"
-          />
-          <kbd className="text-[10px] text-fg-subtle border border-line px-1.5 rounded ml-2">⌘K</kbd>
-        </div>
+        </a>
+        <a
+          href="https://github.com"
+          className="hidden sm:inline-flex text-fg-muted hover:text-fg text-sm transition-colors items-center gap-1.5"
+        >
+          GitHub <Icon.ArrowRight />
+        </a>
       </div>
     </header>
   );
 }
 
-function Nav({
-  active,
-  onChange,
-  criticalCount,
-  scamCount,
-}: {
-  active: string;
-  onChange: (v: string) => void;
-  criticalCount: number;
-  scamCount: number;
-}) {
+// Nav: anchor links that scroll to in-page sections. The active tab tracks
+// the section currently in the viewport via IntersectionObserver — same
+// pattern Apple uses on product pages.
+function Nav({ criticalCount, scamCount }: { criticalCount: number; scamCount: number }) {
   const tabs = [
-    { id: 'overview', label: 'Overview' },
+    { id: 'overview',     label: 'Overview' },
     { id: 'ghost-offices', label: 'Ghost offices', count: criticalCount },
-    { id: 'trustlens', label: 'TrustLens', count: scamCount },
-    { id: 'complaints', label: 'Complaints' },
-    { id: 'agents', label: 'Agents' },
+    { id: 'trustlens',    label: 'TrustLens',     count: scamCount },
+    { id: 'civic-health', label: 'Civic health' },
+    { id: 'agents',       label: 'Agents' },
   ];
+  const [active, setActive] = useState('overview');
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      entries => {
+        // Pick the entry closest to the top edge of the viewport.
+        const visible = entries
+          .filter(e => e.isIntersecting)
+          .sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top)[0];
+        if (visible) setActive(visible.target.id);
+      },
+      { rootMargin: '-120px 0px -60% 0px', threshold: 0 },
+    );
+    for (const t of tabs) {
+      const el = document.getElementById(t.id);
+      if (el) observer.observe(el);
+    }
+    return () => observer.disconnect();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   return (
-    <nav className="border-b border-line">
+    <nav className="sticky top-14 z-30 backdrop-blur-xl bg-bg/80 border-b border-line">
       <div className="mx-auto max-w-6xl px-6 sm:px-10 flex gap-8 overflow-x-auto">
-        {tabs.map(t => (
-          <button
-            key={t.id}
-            onClick={() => onChange(t.id)}
-            className={`relative py-4 text-sm whitespace-nowrap transition-colors ${
-              active === t.id ? 'text-fg' : 'text-fg-muted hover:text-fg'
-            }`}
-          >
-            <span className="inline-flex items-center gap-2">
-              {t.label}
-              {t.count !== undefined && t.count > 0 && (
-                <span className="text-[10px] tabular text-fg-subtle">{t.count}</span>
-              )}
-            </span>
-            {active === t.id && (
-              <span className="absolute inset-x-0 -bottom-px h-px bg-fg" />
-            )}
-          </button>
-        ))}
+        {tabs.map(t => {
+          const isActive = active === t.id;
+          return (
+            <a
+              key={t.id}
+              href={`#${t.id}`}
+              className={`relative py-4 text-sm whitespace-nowrap transition-colors ${
+                isActive ? 'text-fg' : 'text-fg-muted hover:text-fg'
+              }`}
+            >
+              <span className="inline-flex items-center gap-2">
+                {t.label}
+                {t.count !== undefined && t.count > 0 && (
+                  <span className="text-[10px] tabular text-fg-subtle">{t.count}</span>
+                )}
+              </span>
+              {isActive && <span className="absolute inset-x-0 -bottom-px h-px bg-fg" />}
+            </a>
+          );
+        })}
       </div>
     </nav>
   );
@@ -339,9 +344,9 @@ function Stat({ label, value, delta, trend }: { label: string; value: string | n
   );
 }
 
-function Section({ title, subtitle, right, children }: { title: string; subtitle?: string; right?: React.ReactNode; children: React.ReactNode }) {
+function Section({ id, title, subtitle, right, children }: { id?: string; title: string; subtitle?: string; right?: React.ReactNode; children: React.ReactNode }) {
   return (
-    <section className="mb-16 sm:mb-20">
+    <section id={id} className="scroll-mt-32 mb-16 sm:mb-20">
       <div className="flex items-end justify-between mb-6 sm:mb-8">
         <div>
           <h2 className="text-xl sm:text-2xl font-medium text-fg tracking-tight">{title}</h2>
