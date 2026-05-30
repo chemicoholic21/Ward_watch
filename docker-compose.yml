@@ -10,7 +10,7 @@ version: '3.8'
 services:
   mongo:
     image: mongo:7.0
-    container_name: ghostoffice-mongo
+    container_name: wardwatch-mongo
     restart: unless-stopped
     ports:
       - "27017:27017"
@@ -24,7 +24,7 @@ services:
 
   mongo-express:
     image: mongo-express:1.0.2
-    container_name: ghostoffice-mongo-express
+    container_name: wardwatch-mongo-express
     restart: unless-stopped
     ports:
       - "8081:8081"
@@ -38,7 +38,7 @@ services:
 
   web:
     image: node:20-alpine
-    container_name: ghostoffice-web
+    container_name: wardwatch-web
     working_dir: /app
     command: sh -c "npm install && npm run dev"
     ports:
@@ -46,7 +46,7 @@ services:
     environment:
       - NODE_ENV=development
       - MONGO_URI=mongodb://mongo:27017
-      - MONGO_DB=ghostoffice
+      - MONGO_DB=wardwatch
       - NEXT_PUBLIC_API_URL=
     depends_on:
       mongo:
@@ -62,4 +62,4 @@ volumes:
 
 networks:
   default:
-    name: ghostoffice-network
+    name: wardwatch-network

@@ -7,7 +7,7 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL || '';
 // ─────────────────────────────────────────────────────────────────────────────
 // Types
 // ─────────────────────────────────────────────────────────────────────────────
-interface GhostOffice {
+interface GhostOfficeRow {
   office_id: string;
   department: string;
   ward_name: string;
@@ -57,13 +57,73 @@ const Icon = {
 // ─────────────────────────────────────────────────────────────────────────────
 // Component
 // ─────────────────────────────────────────────────────────────────────────────
+// ─────────────────────────────────────────────────────────────────────────────
+// Agent registry — each card maps to an `agent_type` the /api/agents/chat
+// route understands, plus a few suggested prompts to seed the modal.
+// ─────────────────────────────────────────────────────────────────────────────
+type AgentDef = {
+  id: 'ghost-hunter' | 'scam-detector' | 'escalation-tracer' | 'civic-analyzer' | 'rti-drafter';
+  name: string;
+  desc: string;
+  status: 'Active' | 'Idle';
+  prompts: string[];
+};
+
+const AGENTS: AgentDef[] = [
+  {
+    id: 'ghost-hunter',
+    name: 'Ghost Hunter',
+    desc: 'Detects unresponsive offices via complaint pattern analysis',
+    status: 'Active',
+    prompts: [
+      'Which 3 BBMP offices in South zone are worst this month and why?',
+      'Compare BESCOM vs BWSSB ghost scores',
+      'Summarise the top 5 ghost offices in one paragraph',
+    ],
+  },
+  {
+    id: 'scam-detector',
+    name: 'Scam Detector',
+    desc: 'Classifies suspected fraud and impersonation messages',
+    status: 'Active',
+    prompts: [
+      'Is this a scam: "URGENT: BESCOM disconnection in 2 hours. Pay Rs 1500 at bit.ly/pay-now"',
+      'What scam types have spiked in the last week?',
+      'Which department gets impersonated most often?',
+    ],
+  },
+  {
+    id: 'escalation-tracer',
+    name: 'Escalation Tracer',
+    desc: 'Maps complaint journeys to identify bottleneck departments',
+    status: 'Idle',
+    prompts: [
+      'Where do BBMP complaints get stuck most often?',
+      'Which department has the highest transfer count?',
+      'Summarise escalation bottlenecks in 3 bullets',
+    ],
+  },
+  {
+    id: 'rti-drafter',
+    name: 'RTI Drafter',
+    desc: 'Generates RTI applications with cited evidence',
+    status: 'Idle',
+    prompts: [
+      'Draft an RTI for the worst-performing ghost office',
+      'Draft an RTI asking why BESCOM resolution time exceeds SLA',
+      'Help me file an RTI about overdue water complaints in HSR Layout',
+    ],
+  },
+];
+
 export default function Dashboard() {
   const [isLoading, setIsLoading] = useState(true);
-  const [ghostOffices, setGhostOffices] = useState<GhostOffice[]>([]);
+  const [ghostOffices, setGhostOffices] = useState<GhostOfficeRow[]>([]);
   const [scamReports, setScamReports] = useState<ScamReport[]>([]);
   const [analyzeInput, setAnalyzeInput] = useState('');
   const [analysisResult, setAnalysisResult] = useState<any>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [activeAgent, setActiveAgent] = useState<AgentDef | null>(null);
   const stats = { complaints: 5247, ghostCount: 2, scamCount: 3, avgDays: 8.3 };
 
   useEffect(() => {
@@ -104,7 +164,7 @@ export default function Dashboard() {
   }
 
   // ── Fallback demo data so the UI is never empty ──────────────────────────
-  const demoGhosts: GhostOffice[] = [
+  const demoGhosts: GhostOfficeRow[] = [
     { office_id: '1', department: 'BBMP', ward_name: 'Mahadevapura', zone: 'East', ghost_score: 92.4, alert_level: 'critical', complaint_stats: { total: 187, open: 142, overdue: 89 } },
     { office_id: '2', department: 'BWSSB', ward_name: 'HSR Layout', zone: 'South', ghost_score: 87.1, alert_level: 'critical', complaint_stats: { total: 156, open: 118, overdue: 72 } },
     { office_id: '3', department: 'BESCOM', ward_name: 'Whitefield', zone: 'East', ghost_score: 79.8, alert_level: 'high', complaint_stats: { total: 134, open: 98, overdue: 56 } },
@@ -124,7 +184,7 @@ export default function Dashboard() {
     return (
       <div className="min-h-screen bg-bg flex items-center justify-center">
         <div className="text-center animate-pulse-soft">
-          <div className="display text-5xl text-fg mb-3">GhostOffice</div>
+          <div className="display text-5xl text-fg mb-3">WardWatch</div>
           <div className="label">Loading</div>
         </div>
       </div>
@@ -224,19 +284,18 @@ export default function Dashboard() {
         </Section>
 
         {/* ── Agents ─────────────────────────────────────────────────────── */}
-        <Section id="agents" title="Intelligence agents" subtitle="Specialised tools for civic investigation">
+        <Section id="agents" title="Intelligence agents" subtitle="Specialised tools for civic investigation. Click any to ask a question.">
           <div className="grid sm:grid-cols-2 gap-px bg-line">
-            {[
-              { name: 'Ghost Hunter',      desc: 'Detects unresponsive offices via complaint pattern analysis',  status: 'Active' },
-              { name: 'Scam Detector',     desc: 'Classifies suspected fraud and impersonation messages',         status: 'Active' },
-              { name: 'Escalation Tracer', desc: 'Maps complaint journeys to identify bottleneck departments',    status: 'Idle' },
-              { name: 'RTI Drafter',       desc: 'Generates RTI applications with cited evidence',                status: 'Idle' },
-            ].map(a => <AgentCard key={a.name} {...a} />)}
+            {AGENTS.map(a => (
+              <AgentCard key={a.id} agent={a} onOpen={() => setActiveAgent(a)} />
+            ))}
           </div>
         </Section>
       </main>
 
       <Footer />
+
+      {activeAgent && <AgentModal agent={activeAgent} onClose={() => setActiveAgent(null)} />}
     </div>
   );
 }
@@ -250,12 +309,14 @@ function Header() {
     <header className="sticky top-0 z-40 backdrop-blur-xl bg-bg/80 border-b border-line">
       <div className="mx-auto max-w-6xl px-6 sm:px-10 h-14 flex items-center justify-between">
         <a href="#overview" className="flex items-center gap-2 group">
-          <div className="display text-lg text-fg group-hover:text-fg transition-colors">GhostOffice</div>
+          <div className="display text-lg text-fg group-hover:text-fg transition-colors">WardWatch</div>
           <span className="text-fg-subtle text-xs">·</span>
           <span className="text-fg-muted text-xs">Civic Intelligence</span>
         </a>
         <a
-          href="https://github.com"
+          href="https://github.com/chemicoholic21/ward_watch"
+          target="_blank"
+          rel="noopener noreferrer"
           className="hidden sm:inline-flex text-fg-muted hover:text-fg text-sm transition-colors items-center gap-1.5"
         >
           GitHub <Icon.ArrowRight />
@@ -359,7 +420,7 @@ function Section({ id, title, subtitle, right, children }: { id?: string; title:
   );
 }
 
-function OfficeRow({ rank, office }: { rank: number; office: GhostOffice }) {
+function OfficeRow({ rank, office }: { rank: number; office: GhostOfficeRow }) {
   return (
     <div className="flex items-center gap-6 py-5 border-b border-line last:border-b-0 hover:bg-bg-elevated transition-colors group cursor-pointer">
       <div className="w-8 text-right tabular text-fg-subtle text-sm">{String(rank).padStart(2, '0')}</div>
@@ -455,20 +516,203 @@ function ZoneCard({ zone, grade, score, complaints, ghosts }: { zone: string; gr
   );
 }
 
-function AgentCard({ name, desc, status }: { name: string; desc: string; status: string }) {
-  const isActive = status === 'Active';
+function AgentCard({ agent, onOpen }: { agent: AgentDef; onOpen: () => void }) {
+  const isActive = agent.status === 'Active';
   return (
-    <div className="bg-bg p-8 hover:bg-bg-elevated transition-colors cursor-pointer group">
+    <button
+      onClick={onOpen}
+      className="text-left bg-bg p-8 hover:bg-bg-elevated transition-colors group focus:outline-none focus:bg-bg-elevated"
+    >
       <div className="flex items-start justify-between mb-4">
-        <div className="text-fg font-medium">{name}</div>
+        <div className="text-fg font-medium">{agent.name}</div>
         <div className={`inline-flex items-center gap-2 text-[10px] uppercase tracking-widest ${isActive ? 'text-ok' : 'text-fg-subtle'}`}>
           {isActive && <span className="w-1.5 h-1.5 rounded-full bg-ok animate-pulse-soft" />}
-          {status}
+          {agent.status}
         </div>
       </div>
-      <p className="text-sm text-fg-muted leading-relaxed mb-6 max-w-md">{desc}</p>
+      <p className="text-sm text-fg-muted leading-relaxed mb-6 max-w-md">{agent.desc}</p>
       <div className="text-xs text-fg-subtle inline-flex items-center gap-1.5 group-hover:text-fg transition-colors">
-        Open <Icon.ArrowRight />
+        Ask the agent <Icon.ArrowRight />
+      </div>
+    </button>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// AgentModal — opens when an agent card is clicked. Posts the user's prompt
+// to /api/agents/chat and renders the synthesized answer + which tools the
+// agent actually called.
+// ─────────────────────────────────────────────────────────────────────────────
+function AgentModal({ agent, onClose }: { agent: AgentDef; onClose: () => void }) {
+  const [prompt, setPrompt] = useState('');
+  const [isAsking, setIsAsking] = useState(false);
+  const [result, setResult] = useState<{
+    answer: string;
+    tools_used: string[];
+    steps: number;
+    model?: string;
+    usage?: { totalTokens?: number };
+  } | null>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  // Escape to close, focus trap on first input
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
+    window.addEventListener('keydown', onKey);
+    document.body.style.overflow = 'hidden';
+    return () => {
+      window.removeEventListener('keydown', onKey);
+      document.body.style.overflow = '';
+    };
+  }, [onClose]);
+
+  async function ask() {
+    if (!prompt.trim() || isAsking) return;
+    setIsAsking(true);
+    setError(null);
+    setResult(null);
+    try {
+      const res = await fetch(`${API_URL}/api/agents/chat`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ agent_type: agent.id, prompt }),
+      });
+      const data = await res.json();
+      if (!res.ok || !data.success) {
+        setError(data.error || `Request failed (${res.status})`);
+      } else {
+        setResult(data.data);
+      }
+    } catch (e: any) {
+      setError(e?.message ?? 'Network error');
+    }
+    setIsAsking(false);
+  }
+
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-8 bg-black/80 backdrop-blur-sm animate-fade-in"
+      onClick={onClose}
+    >
+      <div
+        className="bg-bg-elevated border border-line rounded-xl w-full max-w-2xl max-h-[85vh] overflow-y-auto"
+        onClick={e => e.stopPropagation()}
+      >
+        {/* Header */}
+        <div className="flex items-start justify-between px-8 pt-8 pb-4">
+          <div>
+            <div className="display text-2xl text-fg mb-1">{agent.name}</div>
+            <p className="text-sm text-fg-muted max-w-md">{agent.desc}</p>
+          </div>
+          <button
+            onClick={onClose}
+            className="text-fg-muted hover:text-fg text-2xl leading-none p-1 -m-1"
+            aria-label="Close"
+          >
+            ×
+          </button>
+        </div>
+
+        {/* Prompt input */}
+        <div className="px-8 pb-6">
+          <textarea
+            value={prompt}
+            onChange={e => setPrompt(e.target.value)}
+            onKeyDown={e => {
+              if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) ask();
+            }}
+            placeholder={`Ask ${agent.name} anything…`}
+            rows={3}
+            autoFocus
+            className="w-full bg-bg-input border border-line rounded-lg px-4 py-3 text-fg placeholder:text-fg-subtle text-sm resize-none focus:outline-none focus:border-line-strong transition-colors"
+          />
+
+          {/* Example prompts as chips */}
+          {!result && !isAsking && (
+            <div className="mt-3">
+              <p className="label mb-2">Try</p>
+              <div className="flex flex-wrap gap-2">
+                {agent.prompts.map(p => (
+                  <button
+                    key={p}
+                    onClick={() => setPrompt(p)}
+                    className="text-xs text-fg-muted bg-bg-raised hover:bg-bg-input border border-line hover:border-line-strong px-3 py-1.5 rounded-full transition-colors text-left"
+                  >
+                    {p.length > 60 ? p.slice(0, 57) + '…' : p}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          <div className="flex items-center justify-between mt-4">
+            <div className="text-xs text-fg-subtle">
+              <kbd className="border border-line rounded px-1.5 py-0.5 mr-1">⌘</kbd>
+              <kbd className="border border-line rounded px-1.5 py-0.5">Enter</kbd>
+              <span className="ml-2">to send</span>
+            </div>
+            <button
+              onClick={ask}
+              disabled={!prompt.trim() || isAsking}
+              className="px-5 h-10 rounded-lg bg-fg text-bg text-sm font-medium hover:bg-fg/90 disabled:bg-fg-subtle disabled:cursor-not-allowed transition-colors inline-flex items-center gap-2"
+            >
+              {isAsking ? 'Thinking…' : <>Ask <Icon.ArrowRight /></>}
+            </button>
+          </div>
+        </div>
+
+        {/* Response area */}
+        {(isAsking || result || error) && (
+          <div className="border-t border-line px-8 py-6 animate-fade-in">
+            {isAsking && (
+              <div className="flex items-center gap-3 text-fg-muted text-sm">
+                <span className="w-1.5 h-1.5 rounded-full bg-fg-muted animate-pulse-soft" />
+                <span>Calling tools and reasoning over data…</span>
+              </div>
+            )}
+
+            {error && (
+              <div className="text-sm">
+                <RiskBadge level="critical" />
+                <p className="mt-3 text-fg leading-relaxed whitespace-pre-wrap">{error}</p>
+                {error.toLowerCase().includes('groq_api_key') && (
+                  <a
+                    href="https://console.groq.com/keys"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="mt-3 inline-flex items-center gap-1.5 text-accent hover:underline text-sm"
+                  >
+                    Get a free Groq API key <Icon.ArrowRight />
+                  </a>
+                )}
+              </div>
+            )}
+
+            {result && (
+              <div>
+                <p className="text-sm text-fg leading-relaxed whitespace-pre-wrap">{result.answer}</p>
+
+                {result.tools_used?.length > 0 && (
+                  <div className="mt-6 pt-4 border-t border-line">
+                    <p className="label mb-3">Tools used · {result.steps} step{result.steps === 1 ? '' : 's'}</p>
+                    <div className="flex flex-wrap gap-2">
+                      {result.tools_used.map((t, i) => (
+                        <span key={`${t}-${i}`} className="text-xs text-fg-muted bg-bg-raised border border-line px-2.5 py-1 rounded-full tabular">
+                          {t}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                <div className="mt-4 text-[10px] text-fg-subtle tabular flex items-center gap-3">
+                  {result.model && <span>model · {result.model}</span>}
+                  {result.usage?.totalTokens != null && <span>· {result.usage.totalTokens} tokens</span>}
+                </div>
+              </div>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );
@@ -479,16 +723,16 @@ function Footer() {
     <footer className="border-t border-line mt-16">
       <div className="mx-auto max-w-6xl px-6 sm:px-10 py-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 text-xs text-fg-subtle">
         <div className="flex items-center gap-2">
-          <span className="text-fg-muted">GhostOffice</span>
+          <span className="text-fg-muted">WardWatch</span>
           <span>·</span>
           <span>v1.0</span>
           <span>·</span>
           <span>Bengaluru civic data</span>
         </div>
         <div className="flex gap-6">
-          <a href="#" className="hover:text-fg transition-colors">Docs</a>
-          <a href="#" className="hover:text-fg transition-colors">API</a>
-          <a href="#" className="hover:text-fg transition-colors">GitHub</a>
+          <a href="https://github.com/chemicoholic21/ward_watch#readme" target="_blank" rel="noopener noreferrer" className="hover:text-fg transition-colors">Docs</a>
+          <a href="https://github.com/chemicoholic21/ward_watch/tree/main/app/api" target="_blank" rel="noopener noreferrer" className="hover:text-fg transition-colors">API</a>
+          <a href="https://github.com/chemicoholic21/ward_watch" target="_blank" rel="noopener noreferrer" className="hover:text-fg transition-colors">GitHub</a>
         </div>
       </div>
     </footer>

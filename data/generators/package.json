@@ -1,7 +1,7 @@
 {
-  "name": "ghostoffice-data-generators",
+  "name": "wardwatch-data-generators",
   "version": "1.0.0",
-  "description": "Synthetic data generators for GhostOffice civic observability platform",
+  "description": "Synthetic data generators for WardWatch civic observability platform",
   "type": "module",
   "main": "generate-all.js",
   "scripts": {

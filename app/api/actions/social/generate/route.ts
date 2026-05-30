@@ -10,7 +10,7 @@ export async function POST(req: NextRequest) {
     const { complaint_id, ghost_office_id, platform = 'twitter' } = await req.json();
 
     let content = '';
-    const hashtags = ['#BengaluruCitizen', '#CivicRights', '#GhostOffice'];
+    const hashtags = ['#BengaluruCitizen', '#CivicRights', '#WardWatch'];
 
     if (complaint_id) {
       const complaint = await esService.get<any>(ES_INDICES.CIVIC_EVENTS, complaint_id);

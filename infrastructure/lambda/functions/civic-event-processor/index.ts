@@ -117,7 +117,7 @@ async function sendAlert(event: CivicEvent): Promise<void> {
   await snsClient.send(new PublishCommand({
     TopicArn: alertTopic,
     Message: JSON.stringify(message),
-    Subject: `GhostOffice Alert: ${message.alert_type}`,
+    Subject: `WardWatch Alert: ${message.alert_type}`,
     MessageAttributes: {
       alert_type: { DataType: 'String', StringValue: message.alert_type },
       department: { DataType: 'String', StringValue: event.department },

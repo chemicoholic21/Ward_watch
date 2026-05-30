@@ -1,6 +1,6 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Transform: AWS::Serverless-2016-10-31
-Description: GhostOffice - Civic Observability Lambda Functions
+Description: WardWatch - Civic Observability Lambda Functions
 
 Parameters:
   Environment:
@@ -49,7 +49,7 @@ Resources:
   CivicDataBucket:
     Type: AWS::S3::Bucket
     Properties:
-      BucketName: !Sub ghostoffice-civic-data-${Environment}
+      BucketName: !Sub wardwatch-civic-data-${Environment}
       NotificationConfiguration:
         LambdaConfigurations:
           - Event: s3:ObjectCreated:*
@@ -64,7 +64,7 @@ Resources:
   CivicEventProcessorFunction:
     Type: AWS::Serverless::Function
     Properties:
-      FunctionName: !Sub ghostoffice-civic-event-processor-${Environment}
+      FunctionName: !Sub wardwatch-civic-event-processor-${Environment}
       CodeUri: functions/civic-event-processor/
       Handler: index.handler
       Description: Processes civic events from S3 and enriches them
@@ -91,14 +91,14 @@ Resources:
   CivicEventProcessorLogGroup:
     Type: AWS::Logs::LogGroup
     Properties:
-      LogGroupName: !Sub /aws/lambda/ghostoffice-civic-event-processor-${Environment}
+      LogGroupName: !Sub /aws/lambda/wardwatch-civic-event-processor-${Environment}
       RetentionInDays: 14
 
   # Ghost Office Calculator Lambda
   GhostOfficeCalculatorFunction:
     Type: AWS::Serverless::Function
     Properties:
-      FunctionName: !Sub ghostoffice-ghost-calculator-${Environment}
+      FunctionName: !Sub wardwatch-ghost-calculator-${Environment}
       CodeUri: functions/ghost-office-calculator/
       Handler: index.handler
       Description: Calculates ghost office scores on schedule
@@ -126,14 +126,14 @@ Resources:
   GhostOfficeCalculatorLogGroup:
     Type: AWS::Logs::LogGroup
     Properties:
-      LogGroupName: !Sub /aws/lambda/ghostoffice-ghost-calculator-${Environment}
+      LogGroupName: !Sub /aws/lambda/wardwatch-ghost-calculator-${Environment}
       RetentionInDays: 14
 
   # Scam Alert Trigger Lambda
   ScamAlertTriggerFunction:
     Type: AWS::Serverless::Function
     Properties:
-      FunctionName: !Sub ghostoffice-scam-alert-trigger-${Environment}
+      FunctionName: !Sub wardwatch-scam-alert-trigger-${Environment}
       CodeUri: functions/scam-alert-trigger/
       Handler: index.handler
       Description: Monitors for scam spikes during outages
@@ -159,14 +159,14 @@ Resources:
   ScamAlertTriggerLogGroup:
     Type: AWS::Logs::LogGroup
     Properties:
-      LogGroupName: !Sub /aws/lambda/ghostoffice-scam-alert-trigger-${Environment}
+      LogGroupName: !Sub /aws/lambda/wardwatch-scam-alert-trigger-${Environment}
       RetentionInDays: 14
 
   # Bedrock Analyzer Lambda
   BedrockAnalyzerFunction:
     Type: AWS::Serverless::Function
     Properties:
-      FunctionName: !Sub ghostoffice-bedrock-analyzer-${Environment}
+      FunctionName: !Sub wardwatch-bedrock-analyzer-${Environment}
       CodeUri: functions/bedrock-analyzer/
       Handler: index.handler
       Description: AI-powered analysis using AWS Bedrock
@@ -200,14 +200,14 @@ Resources:
   BedrockAnalyzerLogGroup:
     Type: AWS::Logs::LogGroup
     Properties:
-      LogGroupName: !Sub /aws/lambda/ghostoffice-bedrock-analyzer-${Environment}
+      LogGroupName: !Sub /aws/lambda/wardwatch-bedrock-analyzer-${Environment}
       RetentionInDays: 14
 
   # API Gateway
   GhostOfficeApi:
     Type: AWS::Serverless::Api
     Properties:
-      Name: !Sub ghostoffice-api-${Environment}
+      Name: !Sub wardwatch-api-${Environment}
       StageName: !Ref Environment
       Cors:
         AllowMethods: "'POST, GET, OPTIONS'"
@@ -219,21 +219,21 @@ Resources:
     Type: AWS::SNS::Topic
     Condition: CreateSNSTopics
     Properties:
-      TopicName: !Sub ghostoffice-civic-alerts-${Environment}
-      DisplayName: GhostOffice Civic Alerts
+      TopicName: !Sub wardwatch-civic-alerts-${Environment}
+      DisplayName: WardWatch Civic Alerts
 
   SecurityAlertsTopicResource:
     Type: AWS::SNS::Topic
     Condition: CreateSNSTopics
     Properties:
-      TopicName: !Sub ghostoffice-security-alerts-${Environment}
-      DisplayName: GhostOffice Security Alerts
+      TopicName: !Sub wardwatch-security-alerts-${Environment}
+      DisplayName: WardWatch Security Alerts
 
   # CloudWatch Dashboard
   GhostOfficeDashboard:
     Type: AWS::CloudWatch::Dashboard
     Properties:
-      DashboardName: !Sub GhostOffice-${Environment}
+      DashboardName: !Sub WardWatch-${Environment}
       DashboardBody: !Sub |
         {
           "widgets": [
@@ -245,9 +245,9 @@ Resources:
               "height": 6,
               "properties": {
                 "metrics": [
-                  ["GhostOffice", "TotalGhostOffices"],
-                  ["GhostOffice", "CriticalGhostOffices"],
-                  ["GhostOffice", "HighRiskGhostOffices"]
+                  ["WardWatch", "TotalGhostOffices"],
+                  ["WardWatch", "CriticalGhostOffices"],
+                  ["WardWatch", "HighRiskGhostOffices"]
                 ],
                 "title": "Ghost Office Metrics",
                 "region": "${AWS::Region}"
@@ -261,9 +261,9 @@ Resources:
               "height": 6,
               "properties": {
                 "metrics": [
-                  ["GhostOffice/Security", "ActiveCorrelations"],
-                  ["GhostOffice/Security", "CriticalCorrelations"],
-                  ["GhostOffice/Security", "MaxSpikeMultiplier"]
+                  ["WardWatch/Security", "ActiveCorrelations"],
+                  ["WardWatch/Security", "CriticalCorrelations"],
+                  ["WardWatch/Security", "MaxSpikeMultiplier"]
                 ],
                 "title": "Security Metrics",
                 "region": "${AWS::Region}"
@@ -276,7 +276,7 @@ Resources:
               "width": 24,
               "height": 6,
               "properties": {
-                "query": "SOURCE '/aws/lambda/ghostoffice-scam-alert-trigger-${Environment}' | fields @timestamp, @message | filter @message like /ALERT/ | sort @timestamp desc | limit 20",
+                "query": "SOURCE '/aws/lambda/wardwatch-scam-alert-trigger-${Environment}' | fields @timestamp, @message | filter @message like /ALERT/ | sort @timestamp desc | limit 20",
                 "title": "Recent Security Alerts",
                 "region": "${AWS::Region}"
               }
@@ -314,4 +314,4 @@ Outputs:
 
   DashboardUrl:
     Description: CloudWatch Dashboard URL
-    Value: !Sub https://${AWS::Region}.console.aws.amazon.com/cloudwatch/home?region=${AWS::Region}#dashboards:name=GhostOffice-${Environment}
+    Value: !Sub https://${AWS::Region}.console.aws.amazon.com/cloudwatch/home?region=${AWS::Region}#dashboards:name=WardWatch-${Environment}

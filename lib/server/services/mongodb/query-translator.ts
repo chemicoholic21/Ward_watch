@@ -2,7 +2,7 @@
  * Translates the Elasticsearch Query DSL (the JSON shape the legacy route
  * handlers pass) into MongoDB filter objects.
  *
- * Supports the subset the GhostOffice routes actually use:
+ * Supports the subset the WardWatch routes actually use:
  *   match_all, match, multi_match, match_phrase_prefix, more_like_this,
  *   term, terms, range,
  *   bool { must, must_not, should, filter },

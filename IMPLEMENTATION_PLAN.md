@@ -1,4 +1,4 @@
-# GhostOffice Implementation Plan
+# WardWatch Implementation Plan
 ## Elastic-Powered Civic Observability & Accountability Intelligence Platform
 
 ---
@@ -1017,7 +1017,7 @@ def handler(event, context):
     # Publish to CloudWatch
     cloudwatch = boto3.client('cloudwatch')
     cloudwatch.put_metric_data(
-        Namespace='GhostOffice',
+        Namespace='WardWatch',
         MetricData=[{
             'MetricName': 'AnomaliesDetected',
             'Value': len(anomalies),
@@ -1124,7 +1124,7 @@ def handler(event, context):
     # Publish metrics to CloudWatch
     cloudwatch = boto3.client('cloudwatch')
     cloudwatch.put_metric_data(
-        Namespace='GhostOffice',
+        Namespace='WardWatch',
         MetricData=[
             {
                 'MetricName': 'GhostOfficeCount',
@@ -1269,7 +1269,7 @@ Return JSON:
 
 ### 3.4 AWS S3 Structure
 ```
-ghostoffice-civic-data/
+wardwatch-civic-data/
 ├── civic-documents/
 │   ├── complaints/
 │   │   └── {complaint_id}/
@@ -1302,8 +1302,8 @@ ghostoffice-civic-data/
       "properties": {
         "title": "Ghost Office Alerts",
         "metrics": [
-          ["GhostOffice", "GhostOfficeCount"],
-          ["GhostOffice", "CriticalWardCount"]
+          ["WardWatch", "GhostOfficeCount"],
+          ["WardWatch", "CriticalWardCount"]
         ],
         "period": 3600
       }
@@ -1313,8 +1313,8 @@ ghostoffice-civic-data/
       "properties": {
         "title": "Scam Detection",
         "metrics": [
-          ["GhostOffice", "ScamReportsAnalyzed"],
-          ["GhostOffice", "HighRiskScamsDetected"]
+          ["WardWatch", "ScamReportsAnalyzed"],
+          ["WardWatch", "HighRiskScamsDetected"]
         ]
       }
     },
@@ -1323,8 +1323,8 @@ ghostoffice-civic-data/
       "properties": {
         "title": "API Performance",
         "metrics": [
-          ["GhostOffice", "APILatency", { "stat": "p99" }],
-          ["GhostOffice", "APIErrors"]
+          ["WardWatch", "APILatency", { "stat": "p99" }],
+          ["WardWatch", "APIErrors"]
         ]
       }
     },
@@ -1352,7 +1352,7 @@ ghostoffice-civic-data/
   },
   "scam-report-processing": {
     "eventPattern": {
-      "source": ["ghostoffice.api"],
+      "source": ["wardwatch.api"],
       "detail-type": ["ScamReportSubmitted"]
     },
     "target": "lambda:scam-scanner"
@@ -1878,7 +1878,7 @@ function generateScamReport(index: number): ScamReport {
 ## 7. FOLDER STRUCTURE
 
 ```
-ghostoffice/
+wardwatch/
 ├── README.md
 ├── docker-compose.yml
 ├── .env.example
@@ -1895,7 +1895,7 @@ ghostoffice/
 ├── infrastructure/
 │   ├── aws/
 │   │   ├── cloudformation/
-│   │   │   └── ghostoffice-stack.yaml
+│   │   │   └── wardwatch-stack.yaml
 │   │   ├── lambda/
 │   │   │   ├── scam-scanner/
 │   │   │   ├── anomaly-detector/

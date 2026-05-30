@@ -245,7 +245,7 @@ async function publishMetrics(offices: GhostOfficeScore[]): Promise<void> {
   };
 
   await cloudWatchClient.send(new PutMetricDataCommand({
-    Namespace: 'GhostOffice',
+    Namespace: 'WardWatch',
     MetricData: [
       {
         MetricName: 'TotalGhostOffices',

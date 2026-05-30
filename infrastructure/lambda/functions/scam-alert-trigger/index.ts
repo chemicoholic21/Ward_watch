@@ -281,14 +281,14 @@ async function publishMetrics(correlations: CorrelationResult[]): Promise<void> 
 
   if (metrics.length > 0) {
     await cloudWatchClient.send(new PutMetricDataCommand({
-      Namespace: 'GhostOffice/Security',
+      Namespace: 'WardWatch/Security',
       MetricData: metrics.slice(0, 20), // CloudWatch limit
     }));
   }
 
   // Also publish aggregate metrics
   await cloudWatchClient.send(new PutMetricDataCommand({
-    Namespace: 'GhostOffice/Security',
+    Namespace: 'WardWatch/Security',
     MetricData: [
       {
         MetricName: 'ActiveCorrelations',
