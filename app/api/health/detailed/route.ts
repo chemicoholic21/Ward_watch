@@ -1,15 +1,21 @@
 import { NextResponse } from 'next/server';
-import { getElasticsearchClient } from '@/lib/server/config/elasticsearch';
+import { getDb } from '@/lib/server/config/mongodb';
+import { COLLECTIONS } from '@/lib/server/config/mongodb';
 
 export const dynamic = 'force-dynamic';
 
 export async function GET() {
   try {
-    const esClient = getElasticsearchClient();
-    const [clusterHealth, clusterStats, nodesInfo] = await Promise.all([
-      esClient.cluster.health(),
-      esClient.cluster.stats(),
-      esClient.nodes.info(),
+    const db = await getDb();
+    const [serverStatus, dbStats, collStats] = await Promise.all([
+      db.admin().serverStatus().catch(() => null),
+      db.stats().catch(() => null),
+      Promise.all(
+        Object.values(COLLECTIONS).map(async name => ({
+          name,
+          count: await db.collection(name).estimatedDocumentCount().catch(() => 0),
+        })),
+      ),
     ]);
 
     return NextResponse.json({
@@ -22,23 +28,15 @@ export async function GET() {
         uptime_seconds: process.uptime(),
         memory: process.memoryUsage(),
       },
-      elasticsearch: {
-        health: {
-          status: clusterHealth.status,
-          cluster_name: clusterHealth.cluster_name,
-          number_of_nodes: clusterHealth.number_of_nodes,
-          active_primary_shards: clusterHealth.active_primary_shards,
-          active_shards: clusterHealth.active_shards,
-          relocating_shards: clusterHealth.relocating_shards,
-          initializing_shards: clusterHealth.initializing_shards,
-          unassigned_shards: clusterHealth.unassigned_shards,
-        },
+      mongodb: {
+        database: db.databaseName,
+        version: serverStatus?.version,
+        collections: collStats,
         stats: {
-          indices_count: clusterStats.indices?.count || 0,
-          docs_count: clusterStats.indices?.docs?.count || 0,
-          store_size: clusterStats.indices?.store?.size_in_bytes || 0,
+          collections_count: dbStats?.collections,
+          objects: dbStats?.objects,
+          storage_size: dbStats?.storageSize,
         },
-        nodes: Object.keys(nodesInfo.nodes || {}).length,
       },
     });
   } catch (error: any) {

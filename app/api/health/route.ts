@@ -1,22 +1,17 @@
 import { NextResponse } from 'next/server';
-import { getElasticsearchClient } from '@/lib/server/config/elasticsearch';
+import { mongoService } from '@/lib/server/services/mongodb/client';
 
 export const dynamic = 'force-dynamic';
 
 export async function GET() {
   try {
-    const esHealth = await getElasticsearchClient().cluster.health();
+    const db = await mongoService.health();
     return NextResponse.json({
       status: 'healthy',
       timestamp: new Date().toISOString(),
       services: {
         api: { status: 'healthy', uptime: process.uptime() },
-        elasticsearch: {
-          status: esHealth.status,
-          cluster_name: esHealth.cluster_name,
-          number_of_nodes: esHealth.number_of_nodes,
-          active_shards: esHealth.active_shards,
-        },
+        mongodb: { status: db.status, database: db.database },
       },
     });
   } catch (error: any) {
