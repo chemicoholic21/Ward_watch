@@ -1,25 +1,25 @@
 import type { Metadata } from 'next';
-import { Inter, JetBrains_Mono } from 'next/font/google';
+import { Poppins } from 'next/font/google';
 import './globals.css';
 
-const inter = Inter({
+// Poppins, self-hosted at build time via next/font (zero CLS, no extra
+// network request). A narrow range of weights, picked for Apple-style
+// display:
+//   300 — hero figures and large display text (Apple's signature "light")
+//   400 — body
+//   500 — labels and quiet emphasis
+//   600 — sparse, only where we really mean it
+const poppins = Poppins({
   subsets: ['latin'],
-  variable: '--font-inter',
-  display: 'swap',
-});
-
-const jetbrainsMono = JetBrains_Mono({
-  subsets: ['latin'],
-  variable: '--font-mono',
+  weight: ['300', '400', '500', '600'],
+  variable: '--font-sans',
   display: 'swap',
 });
 
 export const metadata: Metadata = {
-  title: 'GhostOffice | Civic Intelligence Platform',
-  description: 'Elastic-Powered Civic Observability & Accountability Intelligence for Bengaluru',
-  icons: {
-    icon: '/favicon.ico',
-  },
+  title: 'GhostOffice',
+  description: 'Civic Observability & Accountability Intelligence',
+  icons: { icon: '/favicon.ico' },
 };
 
 export default function RootLayout({
@@ -28,10 +28,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className={`${inter.variable} ${jetbrainsMono.variable}`}>
-      <body className="bg-noise antialiased">
-        {children}
-      </body>
+    <html lang="en" className={poppins.variable}>
+      <body className="font-sans antialiased">{children}</body>
     </html>
   );
 }
