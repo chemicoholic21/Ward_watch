@@ -1,8 +1,8 @@
 {
-  "name": "ghostoffice",
+  "name": "wardwatch",
   "version": "1.0.0",
   "private": true,
-  "description": "GhostOffice - Civic Observability & Accountability Intelligence Platform (Next.js)",
+  "description": "WardWatch - Civic Observability & Accountability Intelligence Platform (Next.js)",
   "scripts": {
     "dev": "next dev",
     "build": "next build",

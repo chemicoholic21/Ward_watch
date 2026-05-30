@@ -16,7 +16,7 @@ function getMongoUri(): string {
 }
 
 function getMongoDbName(): string {
-  return process.env.MONGO_DB || 'ghostoffice';
+  return process.env.MONGO_DB || 'wardwatch';
 }
 
 export function getMongoClient(): Promise<MongoClient> {

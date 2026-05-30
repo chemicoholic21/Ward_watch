@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Seed MongoDB with GhostOffice sample data.
+ * Seed MongoDB with WardWatch sample data.
  *
  *   npm run seed
  *   # or
@@ -21,7 +21,7 @@ dotenv.config({ path: join(__dirname, '../.env.local') });
 dotenv.config({ path: join(__dirname, '../.env') });
 
 const MONGO_URI = process.env.MONGO_URI || 'mongodb://localhost:27017';
-const MONGO_DB = process.env.MONGO_DB || 'ghostoffice';
+const MONGO_DB = process.env.MONGO_DB || 'wardwatch';
 
 // ──────────────────────────────────────────────────────────────────────────────
 // Reference data
@@ -158,7 +158,7 @@ function generateScamReport(index) {
   };
 }
 
-function generateGhostOffice(ward, department) {
+function generateWardWatch(ward, department) {
   const ghostScore = GHOST_WARDS.includes(ward.id) ? randInt(70, 95) : randInt(20, 60);
   const id = `${department}_${ward.id}`;
   return {
@@ -204,7 +204,7 @@ function generateWardMetric(ward, index) {
 // Main
 // ──────────────────────────────────────────────────────────────────────────────
 async function seed() {
-  console.log('\n🌱 Seeding GhostOffice MongoDB\n');
+  console.log('\n🌱 Seeding WardWatch MongoDB\n');
 
   const client = new MongoClient(MONGO_URI, { serverSelectionTimeoutMS: 8000 });
   try {
@@ -257,7 +257,7 @@ async function seed() {
   console.log('👻 Generating ghost office scores...');
   const offices = [];
   for (const ward of WARDS) {
-    for (const dept of DEPARTMENTS.slice(0, 3)) offices.push(generateGhostOffice(ward, dept));
+    for (const dept of DEPARTMENTS.slice(0, 3)) offices.push(generateWardWatch(ward, dept));
   }
   offices.sort((a, b) => b.ghost_score - a.ghost_score);
   offices.forEach((o, i) => (o.rank = i + 1));

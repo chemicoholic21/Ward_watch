@@ -26,7 +26,7 @@ End-to-end walkthrough: a free MongoDB Atlas M0 cluster and a free Vercel projec
 While the cluster spins up, Atlas pops a **Security Quickstart** modal.
 
 1. **Authentication method**: Username and password.
-2. **Username**: `ghostoffice` (or anything).
+2. **Username**: `wardwatch` (or anything).
 3. **Password**: click **Autogenerate Secure Password**, then **Copy** it somewhere safe — Atlas won't show it again.
 4. Click **Create User**.
 
@@ -45,7 +45,7 @@ Click **Finish and Close**, then **Go to Overview**.
 2. Choose **Drivers** → **Node.js** → latest version.
 3. Copy the connection string. Looks like:
    ```
-   mongodb+srv://ghostoffice:<password>@cluster0.abcde.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0
+   mongodb+srv://wardwatch:<password>@cluster0.abcde.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0
    ```
 4. Paste it somewhere safe and replace `<password>` with the password from Step 1.3. URL-encode `@`/`:`/`/` if your password contains them.
 
@@ -64,9 +64,9 @@ Click **Browse Collections** on the cluster. You'll see an empty database. That'
 Vercel deploys best from a Git repo. If you haven't already:
 
 ```bash
-gh repo create ghostoffice --public --source=. --push
+gh repo create wardwatch --public --source=. --push
 # or, if the repo exists:
-git remote add origin https://github.com/<you>/ghostoffice.git
+git remote add origin https://github.com/chemicoholic21/ward_watch.git
 git push -u origin main
 ```
 
@@ -80,7 +80,7 @@ git push -u origin main
 ### Step 2.3 — Import the project
 
 1. On the Vercel dashboard, **Add New…** → **Project**.
-2. Pick your `ghostoffice` repo from the list. Click **Import**.
+2. Pick your `wardwatch` repo from the list. Click **Import**.
 3. **Framework Preset**: Vercel auto-detects **Next.js** from `next.config.js`.
 4. **Root Directory**: leave as `.` (we're a single-project repo now).
 5. **Build & Output Settings**: leave as defaults — `vercel.json` in the repo already pins:
@@ -98,7 +98,7 @@ In the **Environment Variables** panel, add these. The "Environment" column shou
 | Variable | Value | Required? |
 |----------|-------|-----------|
 | `MONGO_URI` | the `mongodb+srv://...` string from Step 1.5 | ✅ once you do the code swap |
-| `MONGO_DB` | `ghostoffice` | ✅ once you do the code swap |
+| `MONGO_DB` | `wardwatch` | ✅ once you do the code swap |
 | `NODE_ENV` | `production` | optional (Vercel sets it) |
 | `ENABLE_BEDROCK` | `false` | ✅ keeps AWS calls disabled |
 | `ENABLE_LAMBDA` | `false` | ✅ |
@@ -122,7 +122,7 @@ node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
 
 1. Click **Deploy**.
 2. Vercel runs `npm install` → `next build` → bundles the 41 API routes as serverless functions → publishes the static frontend.
-3. First deploy takes ~3 min. You'll get a URL like `https://ghostoffice-yourname.vercel.app`.
+3. First deploy takes ~3 min. You'll get a URL like `https://wardwatch-yourname.vercel.app`.
 
 ### Step 2.6 — Verify the deploy
 
@@ -170,7 +170,7 @@ You can seed Atlas from your local machine:
 
 ```bash
 # After the Mongo code migration ships, this will be:
-MONGO_URI="<your Atlas string>" MONGO_DB=ghostoffice npm run seed
+MONGO_URI="<your Atlas string>" MONGO_DB=wardwatch npm run seed
 # Until then, the existing scripts/seed-data.js seeds Elasticsearch instead.
 ```
 

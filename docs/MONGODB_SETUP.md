@@ -26,13 +26,13 @@ Set in `.env.local`:
 
 ```env
 MONGO_URI=mongodb://localhost:27017
-MONGO_DB=ghostoffice
+MONGO_DB=wardwatch
 ```
 
 Verify the connection:
 
 ```bash
-docker exec -it ghostoffice-mongo mongosh --eval "db.runCommand({ ping: 1 })"
+docker exec -it wardwatch-mongo mongosh --eval "db.runCommand({ ping: 1 })"
 # → { ok: 1 }
 ```
 
@@ -65,7 +65,7 @@ Atlas's M0 cluster is permanently free (512 MB storage, shared CPU). Plenty for 
 
 1. In the Atlas left nav: **Database Access** → **+ Add New Database User**.
 2. Auth method: **Password**.
-3. Username: `ghostoffice` (or whatever). Click **Autogenerate Secure Password** and **copy the password** — you can't view it again.
+3. Username: `wardwatch` (or whatever). Click **Autogenerate Secure Password** and **copy the password** — you can't view it again.
 4. Built-in role: **Read and write to any database**.
 5. **Add User**.
 
@@ -82,7 +82,7 @@ Atlas's M0 cluster is permanently free (512 MB storage, shared CPU). Plenty for 
 2. **Drivers** → **Node.js**, latest version.
 3. Copy the string. It looks like:
    ```
-   mongodb+srv://ghostoffice:<password>@cluster0.abcde.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0
+   mongodb+srv://wardwatch:<password>@cluster0.abcde.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0
    ```
 4. Replace `<password>` with the password you copied in step 2.
 
@@ -91,8 +91,8 @@ Atlas's M0 cluster is permanently free (512 MB storage, shared CPU). Plenty for 
 Put it in `.env.local` (and your Vercel/Render env vars for prod):
 
 ```env
-MONGO_URI=mongodb+srv://ghostoffice:YOUR_PASSWORD@cluster0.abcde.mongodb.net/?retryWrites=true&w=majority
-MONGO_DB=ghostoffice
+MONGO_URI=mongodb+srv://wardwatch:YOUR_PASSWORD@cluster0.abcde.mongodb.net/?retryWrites=true&w=majority
+MONGO_DB=wardwatch
 ```
 
 ### 6. (Optional) Sanity-check from your terminal
@@ -100,7 +100,7 @@ MONGO_DB=ghostoffice
 If you have `mongosh` installed:
 
 ```bash
-mongosh "mongodb+srv://cluster0.abcde.mongodb.net/" --username ghostoffice
+mongosh "mongodb+srv://cluster0.abcde.mongodb.net/" --username wardwatch
 # → connection succeeded
 ```
 

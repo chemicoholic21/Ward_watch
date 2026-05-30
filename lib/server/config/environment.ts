@@ -29,7 +29,7 @@ export const config = {
 
   // AWS S3
   s3: {
-    bucketName: process.env.S3_BUCKET_NAME || 'ghostoffice-civic-data',
+    bucketName: process.env.S3_BUCKET_NAME || 'wardwatch-civic-data',
     region: process.env.S3_REGION || 'us-east-1',
   },
 

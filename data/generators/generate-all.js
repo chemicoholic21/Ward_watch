@@ -687,7 +687,7 @@ function generateWardMetrics(complaints, scamReports, ghostOffices) {
 
 // Main execution
 async function main() {
-  console.log('Starting GhostOffice synthetic data generation...\n');
+  console.log('Starting WardWatch synthetic data generation...\n');
 
   // Generate outages first (needed for scam correlation)
   const outages = generateOutages();

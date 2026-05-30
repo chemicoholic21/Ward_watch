@@ -1,4 +1,4 @@
-# GhostOffice Demo Script
+# WardWatch Demo Script
 
 ## Pre-Demo Checklist
 - [ ] Backend running on port 3001
@@ -21,11 +21,11 @@
 
 ---
 
-### Act 2: Enter GhostOffice (1 min)
+### Act 2: Enter WardWatch (1 min)
 
 **Navigate to Dashboard**
 
-> "GhostOffice treats civic infrastructure like a distributed system, using observability principles to detect failures."
+> "WardWatch treats civic infrastructure like a distributed system, using observability principles to detect failures."
 
 **Highlight Stats:**
 - Total Complaints: 5,247
@@ -137,7 +137,7 @@ POST /api/agents/execute
 
 ### Act 6: Actionable Outputs (2 min)
 
-> "Every insight in GhostOffice leads to action."
+> "Every insight in WardWatch leads to action."
 
 **Generate RTI Application:**
 
@@ -198,7 +198,7 @@ Subject: Request for Information regarding civic complaint resolution
 ### Closing (1 min)
 
 **Summary:**
-> "GhostOffice transforms how citizens interact with civic infrastructure:"
+> "WardWatch transforms how citizens interact with civic infrastructure:"
 
 1. **Visibility** - Know which offices are actually working
 2. **Security** - Protect from scams during outages
@@ -234,4 +234,4 @@ If live demo fails:
 
 1. **Screenshot Gallery** - `/docs/screenshots/`
 2. **Recorded Video** - `/docs/demo-video.mp4`
-3. **API Postman Collection** - `/docs/ghostoffice.postman.json`
+3. **API Postman Collection** - `/docs/wardwatch.postman.json`

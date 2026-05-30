@@ -131,7 +131,7 @@ Kept:
 ```
 # Database
 MONGO_URI=mongodb://localhost:27017
-MONGO_DB=ghostoffice
+MONGO_DB=wardwatch
 
 # Public (shipped to browser)
 NEXT_PUBLIC_API_URL=          # leave empty → same-origin

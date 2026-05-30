@@ -17,7 +17,7 @@ const poppins = Poppins({
 });
 
 export const metadata: Metadata = {
-  title: 'GhostOffice',
+  title: 'WardWatch',
   description: 'Civic Observability & Accountability Intelligence',
   icons: { icon: '/favicon.ico' },
 };
