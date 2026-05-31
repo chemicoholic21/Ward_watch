@@ -1,195 +1,65 @@
-# Contributing to WardWatch
+# Contributing
 
-Thank you for your interest in contributing to WardWatch.
+Thanks for the interest. PRs welcome.
 
-WardWatch is an observability-driven civic intelligence platform focused on improving transparency, accountability, and accessibility within Bengaluru’s public infrastructure systems.
+## Setup
 
-The goal of the project is simple:
-
-> Help ordinary citizens understand where civic issues are getting stuck, who is responsible, and what actionable steps can be taken next.
-
-Many Bengaluru residents struggle with:
-- unresolved civic complaints,
-- endless department transfers,
-- lack of accountability,
-- delayed responses,
-- infrastructure outages,
-- and scams that exploit public confusion.
-
-WardWatch attempts to make these invisible failures observable.
-
-By applying observability engineering concepts to civic workflows, the platform helps surface:
-- complaint stagnation,
-- escalation bottlenecks,
-- accountability dead zones,
-- outage-linked scam activity,
-- and ward-level operational inefficiencies.
-
-The long-term vision is to build technology that helps:
-- citizens navigate civic systems more confidently,
-- families support elderly residents remotely,
-- communities identify recurring infrastructure failures,
-- and public systems become more transparent and accountable.
-
----
-
-# How You Can Contribute
-
-Contributions are welcome from developers, designers, civic-tech enthusiasts, data engineers, and anyone interested in building technology for public good.
-
----
-
-# Areas for Contribution
-
-## Elastic & Observability
-Help improve:
-- Elasticsearch queries
-- Aggregations and transforms
-- Kibana dashboards
-- Geo intelligence visualizations
-- Watchers and alert pipelines
-- Vector search relevance
-
----
-
-## AWS Infrastructure
-Contribute to:
-- Lambda workflows
-- EventBridge scheduling
-- Bedrock orchestration
-- Infrastructure automation
-- Monitoring pipelines
-
----
-
-## Backend Development
-Help improve:
-- API performance
-- Event ingestion pipelines
-- Complaint trace reconstruction
-- Fraud intelligence workflows
-- Operational analytics logic
-
----
-
-## Frontend & UX
-Improve:
-- Dashboard usability
-- Civic trace visualizations
-- Accessibility
-- Ward-level operational views
-- Mobile responsiveness
-
----
-
-## Security & Trust Systems
-Contribute toward:
-- Scam detection improvements
-- Risk scoring logic
-- Input validation
-- Abuse prevention
-- Safer civic verification workflows
-
----
-
-# Development Setup
-
-## Clone Repository
+See [README](README.md). Short version:
 
 ```bash
-git clone <repository-url>
-cd wardwatch
+git clone https://github.com/chemicoholic21/ward_watch.git
+cd ward_watch
+cp .env.example .env.local
+npm install
+docker-compose up -d mongo
+npm run seed
+npm run dev
 ```
 
----
+## Workflow
 
-## Install Dependencies
+1. Open an issue first for anything non-trivial — saves wasted work.
+2. Branch off `main`.
+3. Keep commits small and well-described. One logical change per commit.
+4. Before pushing: `npm run build` must pass. `npm run lint` should be clean.
+5. Open a PR with a brief summary of what and why.
 
-```bash
-cd backend && npm install
-cd ../frontend && npm install
+## Project layout
+
+```
+app/                  Next.js App Router
+  api/                HTTP handlers (one route.ts per path)
+  page.tsx, layout    Dashboard UI
+lib/
+  api.ts              Frontend → API client
+  server/             Server-only modules
+    services/         Data services (mongodb, agents, ghost-office, trustlens)
+    config/           Env + Mongo connection
+scripts/seed-mongodb.mjs   Sample data seeder
+docs/                 Setup, deployment, agents guides
 ```
 
----
+## Style
 
-## Configure Environment Variables
+- TypeScript, strict mode. No `any` unless you have a good reason.
+- Tailwind classes, no inline styles. Palette tokens (`bg-bg`, `text-fg-muted`, `border-line`, …) live in `app/globals.css` — change colors there, not in components.
+- LLM agent tools go in `lib/server/services/agents/tools.ts` and follow the existing `tool({ description, inputSchema, execute })` shape. See [`docs/AGENTS_GUIDE.md`](docs/AGENTS_GUIDE.md).
+- New API routes: `app/api/<path>/route.ts`, export `GET` / `POST` / `PATCH`. Use `NextResponse.json({ success, data, error })` for response shape consistency.
 
-Create:
-- `backend/.env`
-- `frontend/.env.local`
+## What's in scope
 
-Configure:
-- Elastic Cloud credentials
-- AWS Bedrock access
-- Lambda configuration
-- SNS settings
+- Bug fixes
+- New agent tools and prompts
+- Better data ingestion (real BBMP / OSM / Reddit feeds)
+- Accessibility, performance, mobile UX
+- Tests (currently none — opinionated test setup PRs welcome)
 
----
+## What's not
 
-## Run Development Environment
+- Renaming `ghost_offices`, `civic_events`, or other collections without a migration plan
+- Adding paid third-party services without a feature flag
+- Architecture overhauls without a prior issue
 
-```bash
-docker-compose up -d
-```
+## License
 
-or
-
-```bash
-cd backend && npm run dev
-cd frontend && npm run dev
-```
-
----
-
-# Contribution Guidelines
-
-Before opening a pull request:
-
-- Open an issue for major feature changes
-- Keep contributions modular and explainable
-- Maintain observability-focused architecture
-- Ensure additions align with the civic accountability vision
-- Document Elastic queries, transforms, and ingestion logic clearly
-
----
-
-# Architectural Principles
-
-WardWatch is designed around:
-- transparency,
-- operational visibility,
-- explainability,
-- and actionable civic intelligence.
-
-The platform intentionally avoids becoming:
-- a generic chatbot,
-- an opaque AI wrapper,
-- or an uncontrolled autonomous system.
-
-Every feature should help improve:
-- accountability visibility,
-- trust,
-- or citizen actionability.
-
----
-
-# Why This Matters
-
-Civic systems affect millions of people daily, yet the internal movement of complaints, delays, and ownership transfers often remain invisible to citizens.
-
-WardWatch aims to bridge that gap by helping people:
-- understand what is happening,
-- identify where accountability broke down,
-- and take informed next steps.
-
-Technology alone cannot solve civic problems.
-
-But better visibility, transparency, and accountability can help communities push for better outcomes.
-
----
-
-# Acknowledgements
-
-WardWatch was originally built as an exploration of how observability engineering concepts can be applied to civic infrastructure systems and public accountability workflows.
-
-Contributions are welcome from anyone who wants to help build technology that makes cities more transparent, accessible, and citizen-friendly.
+By contributing, you agree your work is licensed under the [MIT License](LICENSE).
